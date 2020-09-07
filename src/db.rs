@@ -24,7 +24,8 @@ impl Db {
         let mut p_log = self.path.clone();
         let mut p_lock = self.path.clone();
         let mut p_current = self.path.clone();
-        let mut p_bak = self.path.clone();
+        let mut p_bak = self.path.clone();  
+        // is there a better way to do this?? 
         p_log.push_str("/LOG");
         p_lock.push_str("/LOCK");
         p_current.push_str("/CURRENT");
