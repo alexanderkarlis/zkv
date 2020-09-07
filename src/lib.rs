@@ -1,23 +1,5 @@
-pub mod zkv {
-    pub fn init(path: &str) -> std::io::Result<()> {
-        let split_v: Vec<&str> = path.split("/").collect();
-        if split_v.len() > 1 {
-            let msg: std::string::String = format!("cannot init db here. {}", path);
-            panic!(msg)
-        }
-
-        let mut db_path: std::string::String = String::from("./db/");
-        db_path.push_str(path);
-        std::fs::create_dir_all(db_path)?;
-        Ok(())
-    }
-
-    #[test]
-    fn test_init() {
-        // self.init("data")
-
-    }
-}
+pub mod db;
+pub mod utils;
 
 pub mod test {
     #[test]
@@ -27,6 +9,15 @@ pub mod test {
 
     #[test]
     fn test() {
-        assert_ne!(2+2, 5);
+        assert_ne!(2 + 2, 5);
+    }
+
+    #[test]
+    fn check_db_path() {
+        let f = std::fs::File::open("./db");
+        match f {
+            Err(_) => assert_eq!(1, 0),
+            _ => assert_eq!(1, 1),
+        }
     }
 }
