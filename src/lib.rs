@@ -10,7 +10,7 @@ pub mod test {
 
     #[test]
     fn test() {
-        assert_ne!(2 + 2, 5);
+        
     }
 
     #[test]
