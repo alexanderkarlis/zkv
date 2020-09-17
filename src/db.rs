@@ -6,13 +6,11 @@ pub struct MemDb {
 }
 
 impl MemDb {
-    pub fn get(&self, _key: &str) {
+    pub fn get(&self, key: &str) -> std::string::String {
        let bytes_array = std::fs::read(&self.path).unwrap();
-       println!("{:#?}", bytes_array);
        let str_map = std::str::from_utf8(&bytes_array).unwrap();
-       println!("{:#?}", str_map);
-       let d_map = serde_json::from_str(&str_map).unwrap(); 
-       println!("{:#?}", d_map);
+       let d_map: HashMap<String, String> = serde_json::from_str(&str_map).unwrap(); 
+       d_map.get(key).unwrap().to_string()
     }
 
     pub fn put(&self, key: &str, value: &str) -> std::io::Result<()> {

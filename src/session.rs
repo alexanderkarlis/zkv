@@ -31,11 +31,10 @@ impl Session {
         self.log_file = p_log;
         self.current_file = p_current;
         self.sst_path = p_sst;
-        self.mk_files().unwrap();
         self
     }
 
-    pub fn mk_files(&self) -> std::io::Result<()> {
+    fn mk_files(&self) -> std::io::Result<()> {
         self.create_log_file();
         self.create_current_file();
         self.create_sst_file();
@@ -44,10 +43,12 @@ impl Session {
 
     fn create_log_file(&self) {
         let log_path: &str = &self.log_file;
+        println!("{}", &self.log_file);
         std::fs::File::create(log_path).unwrap();
     }
 
     fn create_sst_file(&self) {
+        println!("{:#?}", &self);
         std::fs::File::create(&self.sst_path.to_string()).unwrap();
     }
 
@@ -57,7 +58,7 @@ impl Session {
     }
 }
 
-pub fn new_session(path: &str) -> Session {
+pub fn new_session(path: &str, path_exists: bool) -> Session {
     let new_db: MemDb = MemDb { path: "".to_string() };
     let session: Session = Session {
         path: path.to_string(),
@@ -67,6 +68,10 @@ pub fn new_session(path: &str) -> Session {
         zkv: new_db,
     };
     let mut zkv_session = session.init();
+    if !path_exists {
+        println!("{}", path_exists);
+        zkv_session.mk_files().unwrap();    
+    }
     let db_file = zkv_session.sst_path.clone();
     zkv_session.zkv.path = db_file;
     zkv_session
@@ -83,10 +88,9 @@ pub fn init(path: &str) -> std::io::Result<Session> {
         panic!(format!("cannot init session here. {}", path))
     }
 
-    // TODO: check and see if path alrady exists otherwise return files and
-    // other cool stuff
-    std::fs::create_dir_all(path)?;
-    let session: Session = new_session(path);
+    let p = std::path::Path::new(path);
+    let cur_db_exists = std::path::Path::exists(p);
+    let session: Session = new_session(path, cur_db_exists);
     Ok(session)
 }
 
@@ -95,18 +99,34 @@ pub mod test_session {
     use super::*;
 
     #[test]
-    fn test_new_session() {
+    fn test_new_session() -> std::io::Result<()> {
         let db_path = std::string::String::from("./db");
-        let sess = new_session(&db_path);
-        assert_eq!(sess.zkv.path, sess.path);
+        let sess = init(&db_path)?;
+        let zkv_db_path = std::string::String::from("./db/DATA.sst");
+
+        assert_eq!(sess.zkv.path, zkv_db_path);
+        Ok(())
     }
 
     #[test]
-    fn check_db_path() {
-        let f = std::fs::File::open("./db");
-        match f {
+    fn test_check_db_path() -> std::io::Result<()> {
+        let db_path = std::string::String::from("./db");
+        let _sess = init(&db_path)?;
+        match std::fs::File::open("./db") {
             Ok(_) => assert!(true, "path exists"),
             Err(_) => assert!(false),
         };
+        Ok(())
+    }
+
+    #[test]
+    fn test_insert() -> std::io::Result<()> {
+        let sess = init("./db")?;
+        match sess.zkv.put("hello", "world") {
+            Ok(_) => assert!(true, "good insert"),
+            Err(_) => assert!(false, "bad insert"), 
+        }
+        assert_eq!(sess.zkv.get("hello"), "world");
+        Ok(())
     }
 }

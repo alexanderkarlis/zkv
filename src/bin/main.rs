@@ -13,4 +13,5 @@ fn main() -> std::io::Result<()> {
 
     let get_val = kv.get("hello");
     println!("{:#?}", get_val);
+    Ok(())
 }
