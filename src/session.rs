@@ -70,6 +70,7 @@ pub fn new_session(path: &str, path_exists: bool) -> Session {
     let mut zkv_session = session.init();
     if !path_exists {
         println!("{}", path_exists);
+        std::fs::create_dir_all(path).unwrap();
         zkv_session.mk_files().unwrap();    
     }
     let db_file = zkv_session.sst_path.clone();
@@ -110,8 +111,7 @@ pub mod test_session {
 
     #[test]
     fn test_check_db_path() -> std::io::Result<()> {
-        let db_path = std::string::String::from("./db");
-        let _sess = init(&db_path)?;
+        let _sess = init("./db")?;
         match std::fs::File::open("./db") {
             Ok(_) => assert!(true, "path exists"),
             Err(_) => assert!(false),
