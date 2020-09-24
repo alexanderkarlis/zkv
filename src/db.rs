@@ -46,6 +46,6 @@ impl MemDb {
     }
 
     fn read_data_file(&self) -> HashMap<String, String> {
-        
+        let bytes_array = std::fs::read(&self.path).unwrap();
     }
 }
